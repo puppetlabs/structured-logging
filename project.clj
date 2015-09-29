@@ -1,4 +1,4 @@
-(defproject puppetlabs/structured-logging "0.1.0-SNAPSHOT"
+(defproject puppetlabs/structured-logging "0.1.0"
   :description "Write data structures to your logs from clojure."
   :url "https://github.com/puppetlabs/structured-logging"
   :license {:name "Apache License, Version 2.0"
