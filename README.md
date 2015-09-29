@@ -5,7 +5,7 @@
  - write messages to arbitrarily named loggers, instead of just the one named
    after the namespace in which the log statement appears.
 
-It is built on clojure.tools.logging, but it only works with logback. 
+It is built on `clojure.tools.logging`, but it only works with logback. 
 
 ## Usage
 
@@ -50,8 +50,8 @@ will always be present.
 ## Configuration
 ### JSON text
 
-If you want to log JSON data where you would otherwise log regular text, replace the 'encoder' element in
-your logback.xml with this one:
+If you want to log JSON data where you would otherwise log regular text, replace the `encoder` element in
+your `logback.xml` with this one:
 
     <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
       <providers>
@@ -144,7 +144,7 @@ feature here is the ability to include arbitrary data as part of the json.
 
 ## Tips
 
-Structured logging is a slippery slope and should be applied where it's has
+Structured logging is a slippery slope and should be applied where it has
 clear benefits. While we've streamlined it a lot, this is heavier than regular
 logging, and it's still non-application code that you have to scatter throughout
 your program.
