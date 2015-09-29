@@ -112,7 +112,7 @@ something like this:
     {
       "@timestamp": "...",
       "level": "WARN",
-      "remote": "https://...",
+      "user-service": "https://...",
       "status": 503,
       "elapsed": 27
     }
@@ -122,24 +122,28 @@ The exact fields that show up depend on how you've configured the encoder;
 
 ## Answers to expected questions
 
-*Q*: Can I embed arbitrary structures in there? 
-*A*: You can log anything that cheshire can serialize, but you may wish to stick
- to simple key-value formats to keep your logs easy to analyze.
+*Can I embed arbitrary structures in there?*
 
-*Q*: What happens when I log a map with :level as the key?
-*A*: Don't do that. It's not yet clear how this case should be handled. For now,
+You can log anything that cheshire can serialize, but you may wish to stick
+to simple key-value formats to keep your logs easy to analyze.
+
+*What happens when I log a map with :level as the key?*
+
+Don't do that. It's not yet clear how this case should be handled. For now,
 avoid such keys. Namespacing your map keys may be prudent if you're worried
 about collisions.
 
-*Q*: Does this library require logstash?
-*A*: No. It does depend on the json encoder that comes with the logback-logstash
+*Does this library require logstash?*
+
+No. It does depend on the json encoder that comes with the logback-logstash
 integration library, but you can point the json it spits out at any old logback
 appender. Critically, it has a feature that allows us to edit the json before it
 gets written, which is where we add our custom information. We *could* write
 such an encoder ourselves, but they already wrote it.
 
-*Q*: Why didn't you use one of the other logback-json encoders?
-*A*: Because those just encode the normal log event fields as json; the useful
+*Why didn't you use one of the other logback-json encoders?*
+
+Because those just encode the normal log event fields as json; the useful
 feature here is the ability to include arbitrary data as part of the json.
 
 ## Tips
@@ -149,9 +153,3 @@ clear benefits. While we've streamlined it a lot, this is heavier than regular
 logging, and it's still non-application code that you have to scatter throughout
 your program.
 
-## License
-
-Copyright © 2015 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
