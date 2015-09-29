@@ -67,10 +67,10 @@
      [{:ns stns, :level :error, :message "Test 123"}]
 
      #(logp [:sync :error] "Test" 123)
-     [{:ns :sync, :level :error, :message "Test 123"}]
+     [{:ns "sync", :level :error, :message "Test 123"}]
 
      #(logp [:sync :error] throwable "Test" 123)
-     [{:ns :sync, :level :error, :message "Test 123", :throwable throwable}]))
+     [{:ns "sync", :level :error, :message "Test 123", :throwable throwable}]))
 
   (testing "custom logf"
    (are [f expected] (expect-log f expected)
@@ -78,10 +78,10 @@
      [{:ns stns, :level :error, :message "Test 123"}]
 
      #(logf [:sync :error] "Test %s" 123)
-     [{:ns :sync, :level :error, :message "Test 123"}]
+     [{:ns "sync", :level :error, :message "Test 123"}]
 
      #(logf [:sync :error] throwable "Test %s" 123)
-     [{:ns :sync, :level :error, :message "Test 123", :throwable throwable}])))
+     [{:ns "sync", :level :error, :message "Test 123", :throwable throwable}])))
 
 (deftest maplog-test
   (are [f expected] (expect-log f expected)
@@ -89,13 +89,13 @@
     [{:ns stns, :level :error, :message "Test", :marker {:key :val}}]
 
     #(maplog [:sync :error] {:key :val} "Test")
-    [{:ns :sync, :level :error, :message "Test", :marker {:key :val}}]
+    [{:ns "sync", :level :error, :message "Test", :marker {:key :val}}]
 
     #(maplog [:sync :error] {:key :val} "Test, {key}")
-    [{:ns :sync, :level :error, :message "Test, :val", :marker {:key :val}}]
+    [{:ns "sync", :level :error, :message "Test, :val", :marker {:key :val}}]
 
     #(maplog [:sync :error] {:key :val} "Test, {key} %s" 42)
-    [{:ns :sync, :level :error, :message "Test, :val 42", :marker {:key :val}}]))
+    [{:ns "sync", :level :error, :message "Test, :val 42", :marker {:key :val}}]))
 
 (deftest maplog-format-escaping
   (let [ctx {:w "%foo"

@@ -37,10 +37,12 @@
   [level-or-pair x & more]
   (if (or (instance? String x) (nil? more)) ; optimize for common case
     `(let [lop# ~level-or-pair
-           [ns# level#] (if (coll? lop#) lop# [~*ns* lop#])]
+           [ns# level#] (if (coll? lop#) lop# [~*ns* lop#])
+           ns# (if (keyword? ns#) (name ns#) ns#)]
        (tlog/log ns# level# nil (print-str ~x ~@more)))
     `(let [lop# ~level-or-pair
            [ns# level#] (if (coll? lop#) lop# [~*ns* lop#])
+           ns# (if (keyword? ns#) (name ns#) ns#)
            logger# (impl/get-logger tlog/*logger-factory* ns#)]
        (if (impl/enabled? logger# level#)
          (let [x# ~x]
@@ -56,10 +58,12 @@
   [level-or-pair x & more]
   (if (or (instance? String x) (nil? more)) ; optimize for common case
     `(let [lop# ~level-or-pair
-           [ns# level#] (if (coll? lop#) lop# [~*ns* lop#])]
+           [ns# level#] (if (coll? lop#) lop# [~*ns* lop#])
+           ns# (if (keyword? ns#) (name ns#) ns#)]
        (tlog/log ns# level# nil (format ~x ~@more)))
     `(let [lop# ~level-or-pair
            [ns# level#] (if (coll? lop#) lop# [~*ns* lop#])
+           ns# (if (keyword? ns#) (name ns#) ns#)
            logger# (impl/get-logger tlog/*logger-factory* ns#)]
        (if (impl/enabled? logger# level#)
          (let [x# ~x]
@@ -177,6 +181,7 @@
   [level-or-pair x y & more]
   `(let [lop# ~level-or-pair
          [ns# level#] (if (coll? lop#) lop# [~*ns* lop#])
+         ns# (if (keyword? ns#) (name ns#) ns#)
          logger# (impl/get-logger tlog/*logger-factory* ns#)]
      (when (impl/enabled? logger# level#)
        (maplog' logger# ns# level# ~x ~y ~@more))))
