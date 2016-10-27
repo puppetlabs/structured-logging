@@ -151,17 +151,23 @@
         (if (instance? Throwable throwable-or-ctx)
           [throwable-or-ctx ctx-or-message (first more) (rest more)]
           [nil throwable-or-ctx ctx-or-message more])
-        esc-ctx (mapvals #(.replace (str %) "%" "%%") ctx)]
-
-    (write-with-marker! logger level throwable
-                        (apply format (interpolate-message msg esc-ctx) fmt-args)
-                        ctx)))
+        msg (if (string? msg)
+              (let [esc-ctx (mapvals #(.replace (str %) "%" "%%") ctx)]
+                (apply format (interpolate-message msg esc-ctx) fmt-args))
+              (msg ctx))]
+    (write-with-marker! logger level throwable msg ctx)))
 
 (defmacro maplog
-  "Logs an event after expanding any braced references to ctx-map keys
-  in the message into the corresponding ctx-map values, and then
-  passing the expanded string and format-args to clojure.core/format.
-  Includes the ctx-map in the event as an slf4j event Marker.
+  "Logs an event with ctx-map as an slf4j event Marker.
+
+  When a message string is provided, expands any braced key references
+  like \"{foo}\" in the string into the corresponding ctx-map values,
+  and then passes the expanded string and format-args to
+  clojure.core/format.  Percent-escapes the expansions so the content
+  can't be interpreted as format directives.
+
+  When a message-generator is provided, calls (message-generator
+  ctx-map) to generate the log message.
 
   The level-or-pair parameter may be either a log level keyword like
   :error or a vector of a custom logger and the log level, like
@@ -175,9 +181,14 @@
            \"Failed to pull record from remote {remote}. Response: status {status}\")
 
   (maplog [:sync :info] {:remote ...}
-           \"Finished pull from {remote} in %s seconds\" sync-time)"
+           \"Finished pull from {remote} in %s seconds\" sync-time)
+
+  (maplog :info {:status 200}
+          #(i18n/trs \"Received success status {0}\" (:status %1)))"
   {:arglists '([level-or-pair ctx-map message & format-args]
-               [level-or-pair throwable ctx-map message & format-args])}
+               [level-or-pair throwable ctx-map message & format-args]
+               [level-or-pair ctx-map message-generator]
+               [level-or-pair throwable ctx-map message-generator])}
   [level-or-pair x y & more]
   `(let [lop# ~level-or-pair
          [ns# level#] (if (coll? lop#) lop# [~*ns* lop#])
