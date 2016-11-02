@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+#
+# Usage: ./scripts/cibuild [release-level]
+#
+# This script exists to make the steps of `lein release` more
+# flexible and explicit.
+#
+# If no `release-level` is specified, expects to find a -SNAPSHOT
+# version in the project.clj file, removes the -SNAPSHOT suffix,
+# and releases that version.
+#
+# If a `release-level` argument is provided, the project will be
+# bumped to that level before releasing.
+
+set -eu
+
+E_BAD_ARGS=66
+
+DO_validateReleaseLevel() {
+    case $1 in
+        ":current")
+        ;;
+        ":minor")
+        ;;
+        ":major")
+        ;;
+        ":alpha")
+        ;;
+        ":beta")
+        ;;
+        ":rc")
+        ;;
+        *)
+            echo "The release level must be one of: :current, :minor, :major, :alpha, :beta, or :rc"
+            exit $E_BAD_ARGS
+            ;;
+esac
+}
+
+if [ $# -eq 1 ]; then
+    DO_validateReleaseLevel $1
+fi
+
+# For automated builds, this can be helpful.
+echo $(lein version)
+echo $(git --version)
+
+# Assumed `master` is main branch
+git checkout master
+
+lein test
+
+lein vcs assert-committed
+
+RELEASE_LEVEL="${1:-CURRENT_SNAPSHOT}"
+
+if [ "$RELEASE_LEVEL" = 'CURRENT_SNAPSHOT' ] || [ "$RELEASE_LEVEL" = ":current" ] ; then
+    echo "Using current version (sans -SNAPSHOT) as release version..."
+    lein change version leiningen.release/bump-version release
+else
+    echo "Bumping project version by $RELEASE_LEVEL level, then releasing..."
+    lein change version leiningen.release/bump-version $RELEASE_LEVEL
+    lein change version leiningen.release/bump-version release
+fi
+
+# Ensure new version is in target/ for below check on $RELEASED_VERSION
+lein install
+
+lein vcs commit
+
+export RELEASED_VERSION=v$(cat target/classes/META-INF/maven/com.rentpath/structured-logging/pom.properties | grep '^\bversion\b' | cut -d"=" -f2-)
+git tag -m "Release $RELEASED_VERSION" $RELEASED_VERSION
+
+lein do deploy releases, change version leiningen.release/bump-version
+lein do vcs commit, vcs push
