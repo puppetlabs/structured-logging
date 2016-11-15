@@ -1,4 +1,4 @@
-# puppetlabs/structured-logging
+# puppetlabs/structured-logging [![Clojars Project](https://img.shields.io/clojars/v/puppetlabs/structured-logging.svg)](https://clojars.org/puppetlabs/structured-logging) [![Build Status](https://travis-ci.org/puppetlabs/structured-logging.svg?branch=master)](https://travis-ci.org/puppetlabs/structured-logging)
 
 `structured-logging` is a library that helps you to:
  - write arbitrary JSON to your logs, making it easier to interface with log analysis tools.
