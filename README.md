@@ -160,3 +160,9 @@ Structured logging is a slippery slope and should be applied where it has
 clear benefits. While we've streamlined it a lot, this is heavier than regular
 logging, and it's still non-application code that you have to scatter throughout
 your program.
+
+## License
+
+Copyright © 2015 Puppet Labs
+
+Distributed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
