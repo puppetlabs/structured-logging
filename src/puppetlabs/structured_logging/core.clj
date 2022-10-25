@@ -99,3 +99,45 @@
                             ~throwable
                             (~create-message ctx-map#)
                             ctx-map#)))))
+
+(defmacro trace
+  "Trace level logging."
+  ([ctx-map create-message]
+   `(trace nil ~ctx-map ~create-message))
+  ([throwable ctx-map create-message]
+   `(maplog :trace ~throwable ~ctx-map ~create-message)))
+
+(defmacro debug
+  "Debug level logging."
+  ([ctx-map create-message]
+   `(debug nil ~ctx-map ~create-message))
+  ([throwable ctx-map create-message]
+   `(maplog :debug ~throwable ~ctx-map ~create-message)))
+
+(defmacro info
+  "Info level logging."
+  ([ctx-map create-message]
+   `(info nil ~ctx-map ~create-message))
+  ([throwable ctx-map create-message]
+   `(maplog :info ~throwable ~ctx-map ~create-message)))
+
+(defmacro warn
+  "Warn level logging."
+  ([ctx-map create-message]
+   `(warn nil ~ctx-map ~create-message))
+  ([throwable ctx-map create-message]
+   `(maplog :warn ~throwable ~ctx-map ~create-message)))
+
+(defmacro error
+  "Error level logging."
+  ([ctx-map create-message]
+   `(error nil ~ctx-map ~create-message))
+  ([throwable ctx-map create-message]
+   `(maplog :error ~throwable ~ctx-map ~create-message)))
+
+(defmacro fatal
+  "Fatal level logging."
+  ([ctx-map create-message]
+   `(fatal nil ~ctx-map ~create-message))
+  ([throwable ctx-map create-message]
+   `(maplog :fatal ~throwable ~ctx-map ~create-message)))
