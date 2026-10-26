@@ -43,6 +43,11 @@ jobs:
       # underneath them, so the report would be missing shipped libraries.
       - name: create pom.xml
         run: lein with-profile -dev pom
+      # Mend uploads even when its own dependency resolution fails, and the
+      # upload replaces the project's inventory with an empty one. Resolve
+      # here first so a broken dependency fails the job before Mend runs.
+      - name: resolve dependencies
+        run: lein with-profile -dev deps
       # download mend
       - name: download_mend
         env:
@@ -60,8 +65,8 @@ jobs:
         run: |
           set -o pipefail
           java -jar wss-unified-agent.jar | tee mend-scan.log
-          # A failed Maven resolution still uploads, with a near-empty
-          # inventory that would read as a clean repo. Fail instead.
+          # Backstop for a resolution failure that only Mend's Maven run hits.
+          # The upload has already happened by this point, but the job goes red.
           if grep -q "Failed getting dependencies" mend-scan.log; then
             echo "::error::Mend's Maven dependency resolution failed; failing so the scan doesn't report an empty inventory."
             exit 1
