@@ -1,0 +1,82 @@
+name: mend_scan
+on:
+  schedule:
+    # run every day at 3:00am
+    - cron: 0 3 * * *
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Branches to scan, each into its own <repo>-<branch> Mend project.
+        # Add a release branch here if one is ever cut.
+        branch: [main]
+    steps:
+      - name: connect_twingate
+        uses: twingate/github-action@358e205bb31e636fef1dfb706228ab60eb90c181 # v1.11
+        with:
+          service-key: ${{ secrets.TWINGATE_PUBLIC_REPO_KEY }}
+      - name: checkout ${{ matrix.branch }}
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ matrix.branch }}
+          fetch-depth: 1
+      # install java which is required for mend and clojure
+      - name: setup java
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: temurin
+          java-version: 17
+      # install leiningen, which is all `lein pom` needs
+      - name: Install Clojure tools
+        uses: DeLaGuardo/setup-clojure@bc7570e912b028bbcc22f457adec7fdf98e2f4ed # 12.5
+        with:
+          lein: latest                  # Leiningen
+      # Leave out the :dev profile. `lein pom` writes :dev dependencies as
+      # test scope, and Mend drops runtime dependencies that Maven resolves
+      # underneath them, so the report would be missing shipped libraries.
+      - name: create pom.xml
+        run: lein with-profile -dev pom
+      # Mend uploads even when its own dependency resolution fails, and the
+      # upload replaces the project's inventory with an empty one. Resolve
+      # here first so a broken dependency fails the job before Mend runs.
+      - name: resolve dependencies
+        run: lein with-profile -dev deps
+      # download mend
+      - name: download_mend
+        env:
+          # Pinned rather than tracking the floating `wss-unified-agent.jar` S3
+          # key: this job holds the Mend credentials, so the agent must not be
+          # a mutable remote object. To bump, pick a new release and copy its
+          # published .jar.sha256.
+          UA_VERSION: v26.8.2
+          UA_SHA256: 7fcdd2e8444690c225536cbae81e90189c2836be39e4442ecbbf5043eec49dea
+        run: |
+          curl -fsSL -o wss-unified-agent.jar \
+            "https://github.com/whitesource/unified-agent-distribution/releases/download/${UA_VERSION}/wss-unified-agent.jar"
+          echo "${UA_SHA256}  wss-unified-agent.jar" | sha256sum -c -
+      - name: run mend
+        run: |
+          set -o pipefail
+          java -jar wss-unified-agent.jar | tee mend-scan.log
+          # Backstop for a resolution failure that only Mend's Maven run hits.
+          # The upload has already happened by this point, but the job goes red.
+          if grep -q "Failed getting dependencies" mend-scan.log; then
+            echo "::error::Mend's Maven dependency resolution failed; failing so the scan doesn't report an empty inventory."
+            exit 1
+          fi
+        env:
+          WS_APIKEY: ${{ secrets.MEND_API_KEY }}
+          WS_WSS_URL: https://saas-eu.whitesourcesoftware.com/agent
+          WS_USERKEY: ${{ secrets.MEND_TOKEN }}
+          WS_PRODUCTNAME: Puppet Enterprise
+          WS_PROJECTNAME: ${{ github.event.repository.name }}-${{ matrix.branch }}
+          WS_INCLUDES: pom.xml
+          WS_RESOLVEALLDEPENDENCIES: false
+          WS_MAVEN_RESOLVEDEPENDENCIES: true
