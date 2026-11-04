@@ -3,7 +3,7 @@
   :url "https://github.com/puppetlabs/structured-logging"
   :license {:name "Apache License, Version 2.0"
             :url "http://www.apache.org/licenses/LICENSE-2.0.html"}
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [[org.clojure/clojure "1.11.2"]
                  [net.logstash.logback/logstash-logback-encoder "9.0"]
                  [org.clojure/tools.logging "0.3.1"]
                  [cheshire "6.1.0"]
