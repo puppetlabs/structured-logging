@@ -7,6 +7,7 @@
                  [net.logstash.logback/logstash-logback-encoder "9.0"]
                  [org.clojure/tools.logging "0.3.1"]
                  [cheshire "6.2.0"]
+                 [com.fasterxml.jackson.core/jackson-core "2.21.8"]
                  [com.fasterxml.jackson.dataformat/jackson-dataformat-cbor "2.21.8"]
                  [org.slf4j/slf4j-api "1.7.21"]]
   :plugins [[lein-release "1.0.5"]]
